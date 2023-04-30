@@ -28,43 +28,69 @@ function addKeys(cases){
 }
 
 function addFunk(){
-const buttons = document.querySelectorAll('.keyboard__btn');
-buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const cursor = textArea.selectionEnd;
-        switch(btn.textContent){
-            case 'tab': textArea.value += '    ';
-                break;
-            case 'caps lock': 
-                isCapsLock = !isCapsLock;
+    const buttons = document.querySelectorAll('.keyboard__btn');
+    buttons.forEach(btn => {
+        if(btn.textContent == 'shift'){
+            btn.addEventListener('mousedown', () => {
+                if(isCapsLock == false){
+                    addKeys("upperCase");
+                }else{
+                    addKeys("lowerCase");
+                }
+            });
+        }
+        if(btn.textContent == 'shift'){
+            btn.addEventListener('mouseup', () => {
                 if(isCapsLock == false){
                     addKeys("lowerCase");
                 }else{
-                    addKeys("upperCase");
+                    addKeys("capsLock");
                 }
-                break;
-            case 'shift': textArea.value += '';
-                break;
-            case 'space': textArea.value += ' ';
-                break;
-            case 'backspace': textArea.value = textArea.value.slice(0, -1);
-                break;
-            case 'del': 
-                if(cursor < textArea.value.length){  
-                    textArea.value = textArea.value.slice(0, cursor) + textArea.value.slice(cursor + 1);
+            });
+        }
+
+        btn.addEventListener('click', () => {
+            const cursor = textArea.selectionEnd;
+            switch(btn.textContent){
+                case 'tab':
+                    textArea.value = textArea.value.slice(0, cursor) + '    ' + textArea.value.slice(cursor);
                     textArea.focus();
-                    textArea.selectionEnd = cursor;
-                }
-                break;
-            case 'enter': textArea.value += '\n';
-                break;
-            default: 
-                textArea.value = textArea.value.slice(0, cursor) + btn.textContent + textArea.value.slice(cursor);
-                textArea.focus();
-                textArea.selectionEnd = cursor + 1;
-                break;
-        }   
+                    textArea.selectionEnd = cursor + 4;
+                    break;
+                case 'caps lock':
+                    isCapsLock = !isCapsLock;
+                    if(isCapsLock == false){
+                        addKeys("lowerCase");
+                    }else{
+                        addKeys("capsLock");
+                    }
+                    break;
+                case 'shift': break;
+                case 'space': addText(cursor, ' ');
+                    break;
+                case 'backspace': textArea.value = textArea.value.slice(0, cursor - 1) + textArea.value.slice(cursor);
+                    textArea.focus();
+                    textArea.selectionEnd = cursor - 1;
+                    break;
+                case 'del': 
+                    if(cursor < textArea.value.length){  
+                        textArea.value = textArea.value.slice(0, cursor) + textArea.value.slice(cursor + 1);
+                        textArea.focus();
+                        textArea.selectionEnd = cursor;
+                    }
+                    break;
+                case 'enter': addText(cursor, '\n');
+                    break;
+                default: addText(cursor, btn.textContent);
+                    break;
+            }   
+        })
     })
-})
+}
+
+function addText(cursor, value){
+    textArea.value = textArea.value.slice(0, cursor) + value + textArea.value.slice(cursor);
+    textArea.focus();
+    textArea.selectionEnd = cursor + 1;
 }
 
