@@ -1,10 +1,12 @@
 import {keys} from "./keys.js";
 
 const textArea = document.createElement('textarea');
+textArea.classList.add('text-area');
 textArea.placeholder = 'Type here...';
 document.body.appendChild(textArea);
 
 const keyboard = document.createElement('div');
+keyboard.classList.add('keyboard');
 document.body.appendChild(keyboard);
 
 let isCapsLock = false;
@@ -17,10 +19,16 @@ function addKeys(cases){
     
     keys.en[cases].forEach(row => {
         const rowKey = document.createElement('div');
+        rowKey.classList.add('keyboard__row')
         row.forEach(key => {
             const button = document.createElement('button');
-            button.classList.add('keyboard__btn')
             button.textContent = key;
+            button.classList.add('keyboard__btn');
+            if(key == 'Space'){
+                button.classList.add('keyboard__btn-space');
+            }else if(key == 'Shift'){
+                button.classList.add('keyboard__btn-shift');
+            }
             rowKey.appendChild(button);
         })
         keyboard.appendChild(rowKey);
@@ -30,7 +38,7 @@ function addKeys(cases){
 
 function addFunk(){
     const buttons = document.querySelectorAll('.keyboard__btn');
-    buttons.forEach(btn => {
+    buttons.forEach(btn => {   
         if(btn.textContent == 'Shift'){
             btn.addEventListener('mousedown', () => {
                 if(isCapsLock == false){
@@ -50,10 +58,11 @@ function addFunk(){
             });
         }
 
-        btn.addEventListener('click', () => {
+        btn.addEventListener('mousedown', () => {
+            btn.classList.add('keyboard__btn_active');
             const cursor = textArea.selectionEnd;
             switch(btn.textContent){
-                case 'Tab':
+                case 'Tab': 
                     textArea.value = textArea.value.slice(0, cursor) + '    ' + textArea.value.slice(cursor);
                     textArea.focus();
                     textArea.selectionEnd = cursor + 4;
@@ -89,14 +98,26 @@ function addFunk(){
                 addText(cursor, btn.textContent);
                     break;
             }   
-        })   
-    })
+        }) 
+
+        btn.addEventListener('mouseup', () => {
+            btn.classList.remove('keyboard__btn_active');
+        });
+    });
 }
 
 document.addEventListener('keydown', event => {
     const { key } = event;
+    const buttons = document.querySelectorAll('.keyboard__btn');
     const cursor = textArea.selectionEnd;
     event.preventDefault();
+
+    buttons.forEach(btn => {
+        if(btn.textContent == key){
+            btn.classList.add('keyboard__btn_active');
+        }
+    })
+
     switch(key){
         case 'Tab':
             textArea.value = textArea.value.slice(0, cursor) + '    ' + textArea.value.slice(cursor);
@@ -137,6 +158,7 @@ document.addEventListener('keydown', event => {
         case 'Control': break;
         case 'Meta': break;
         case 'alt': break;
+        case 'ALT': break;
         case 'ArrowUp': addText(cursor, '▲');
             break;
         case 'ArrowLeft': addText(cursor, '◄');
@@ -145,13 +167,14 @@ document.addEventListener('keydown', event => {
             break;
         case 'ArrowRight': addText(cursor, '►');
             break;
-        default: 
+        default:
             let value;
             if((isCapsLock == false && isShift == false) || (isCapsLock == true && isShift == true)){
                 value = key.toLowerCase();
             }else if((isCapsLock == true && isShift == false) || (isCapsLock == false && isShift == true)){
                 value = key.toUpperCase();
             }
+
             addText(cursor, value);
             break;
     }  
@@ -159,6 +182,8 @@ document.addEventListener('keydown', event => {
 
 document.addEventListener('keyup', event => {
     const { key } = event;
+    const button = document.querySelector('.keyboard__btn_active');
+    
     switch(key){
         case 'CapsLock': break;
         case 'Shift':
@@ -169,7 +194,7 @@ document.addEventListener('keyup', event => {
                 addKeys("capsLock");
             }
             break;
-        default:
+        default: button.classList.remove('keyboard__btn_active');
             break;
     }
 });
